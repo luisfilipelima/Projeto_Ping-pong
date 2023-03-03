@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -61,13 +61,20 @@
         y: 0,
         w: line.w,
         h: 200,
+        speed: 5,
         _move: function () {
-          this.y = ball.y
+          if (this.y + this.h / 2 < ball.y + ball.r) {
+            this.y += this.speed
+          } else {
+            this.y -= this.speed
+          }
+        },
+        speedUp: function () {
+          this.speed += 2
         },
         draw: function () {
           canvasCtx.fillStyle = "#ffffff"
           canvasCtx.fillRect(this.x, this.y, this.w, this.h)
-
           this._move()
         },
       }
@@ -90,10 +97,10 @@
           canvasCtx.fillText(this.computer, field.w / 4 + field.w / 2, 50)
         },
       }
-      // objeto bola
+
       const ball = {
-        x: 0,
-        y: 0,
+        x: field.w / 2,
+        y: field.h / 2,
         r: 20,
         speed: 5,
         directionX: 1,
@@ -114,16 +121,21 @@
               this._pointUp()
             }
           }
-          // verifica se o jogador 2 fez um ponto
 
+          // verifica se o jogador 2 fez um ponto (x < 0)
           if (this.x < this.r + leftPaddle.w + gapX) {
-             if(this.y + this.r > leftPaddle.y && this.y - this.r < leftPaddle.y + leftPaddle.h){
-                this._reverseX()
-             } else{
-                score.computer()
-                this._pointUp()
-
-             }
+            // verifica se a raquete esquerda está na posição y da bola
+            if (
+              this.y + this.r > leftPaddle.y &&
+              this.y - this.r < leftPaddle.y + leftPaddle.h
+            ) {
+              // rebate a bola intervertendo o sinal de X
+              this._reverseX()
+            } else {
+              // pontuar o jogador 2
+              score.increaseComputer()
+              this._pointUp()
+            }
           }
 
           // verifica as laterais superior e inferior do campo
@@ -145,11 +157,15 @@
           // -1 * -1 = 1
           this.directionY *= -1
         },
-        
+        _speedUp: function () {
+          this.speed += 2
+        },
         _pointUp: function () {
-           
-            this.x = field.w / 2
-            this.y = field.h / 2
+          this._speedUp()
+          rightPaddle.speedUp()
+
+          this.x = field.w / 2
+          this.y = field.h / 2
         },
         _move: function () {
           this.x += this.directionX * this.speed
